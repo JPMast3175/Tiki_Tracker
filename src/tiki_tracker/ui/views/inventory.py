@@ -41,7 +41,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
             return [
                 ft.Container(
                     ft.Text("No inventory items found. Tap + to add some!", color=T.TEXT_DIM, size=14),
-                    alignment=ft.alignment.center,
+                    alignment=ft.Alignment(0, 0),
                     padding=40,
                 )
             ]
@@ -54,8 +54,9 @@ def build(page: ft.Page, services: dict) -> ft.View:
                 controls.append(
                     ft.Container(
                         ft.Text(current_cat.upper(), size=11, color=T.ACCENT,
-                                weight=ft.FontWeight.BOLD, letter_spacing=1.2),
-                        padding=ft.padding.only(left=4, top=12, bottom=4),
+                                weight=ft.FontWeight.BOLD,
+                                style=ft.TextStyle(letter_spacing=1.2)),
+                        padding=ft.Padding(left=4, right=0, top=12, bottom=4),
                     )
                 )
 
@@ -96,7 +97,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                 ),
                 bgcolor=T.SURFACE,
                 border_radius=10,
-                padding=ft.padding.symmetric(horizontal=16, vertical=10),
+                padding=ft.Padding(left=16, right=16, top=10, bottom=10),
             )
             controls.append(tile)
 
@@ -229,7 +230,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
         value="All",
         options=[ft.dropdown.Option("All")] + [ft.dropdown.Option(c) for c in CATEGORIES],
         bgcolor=T.SURFACE, color=T.TEXT, border_color=T.SECONDARY,
-        width=130, on_change=on_cat_change,
+        width=130, on_select=on_cat_change,
     )
 
     initial_items = load_items()
@@ -238,14 +239,14 @@ def build(page: ft.Page, services: dict) -> ft.View:
         controls=build_list_controls(initial_items),
         spacing=6,
         expand=True,
-        padding=ft.padding.symmetric(horizontal=16, vertical=8),
+        padding=ft.Padding(left=16, right=16, top=8, bottom=8),
     )
 
     content = ft.Column(
         [
             ft.Container(
                 content=ft.Row([search_field, ft.Container(width=8), cat_filter]),
-                padding=ft.padding.only(left=16, right=16, top=12, bottom=4),
+                padding=ft.Padding(left=16, right=16, top=12, bottom=4),
             ),
             item_list,
         ],

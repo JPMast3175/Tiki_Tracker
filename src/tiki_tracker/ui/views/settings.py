@@ -31,7 +31,7 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
             T.snack(page, f"Backup failed: {exc}", error=True)
 
     # ── File picker for import ─────────────────────────────────────────────
-    def on_file_picked(e: ft.FilePickerResultEvent) -> None:
+    def on_file_picked(e: ft.ControlEvent) -> None:
         if not e.files:
             return
         try:
@@ -44,7 +44,8 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
         except Exception as exc:
             T.snack(page, f"Import failed: {exc}", error=True)
 
-    file_picker = ft.FilePicker(on_result=on_file_picked)
+    file_picker = ft.FilePicker()
+    file_picker.on_result = on_file_picked
     page.overlay.append(file_picker)
 
     def pick_import_file(_: ft.ControlEvent) -> None:
@@ -79,7 +80,7 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
             ),
             bgcolor=T.SURFACE,
             border_radius=12,
-            padding=ft.padding.symmetric(horizontal=16, vertical=14),
+            padding=ft.Padding(left=16, right=16, top=14, bottom=14),
             on_click=on_click,
             ink=True,
         )
@@ -101,12 +102,12 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=4,
                 ),
-                alignment=ft.alignment.center,
-                padding=ft.padding.symmetric(vertical=24),
+                alignment=ft.Alignment(0, 0),
+                padding=ft.Padding(left=0, right=0, top=24, bottom=24),
             ),
             ft.Container(
                 T.section_title("EXPORT"),
-                padding=ft.padding.only(left=16, top=8, bottom=8),
+                padding=ft.Padding(left=16, right=0, top=8, bottom=8),
             ),
             ft.Container(
                 content=ft.Column(
@@ -134,12 +135,12 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
                     ],
                     spacing=0,
                 ),
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
             ),
             ft.Container(height=16),
             ft.Container(
                 T.section_title("IMPORT"),
-                padding=ft.padding.only(left=16, bottom=8),
+                padding=ft.Padding(left=16, right=0, top=0, bottom=8),
             ),
             ft.Container(
                 content=setting_tile(
@@ -148,12 +149,12 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
                     "Load recipes from a JSON export file",
                     pick_import_file,
                 ),
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
             ),
             ft.Container(height=16),
             ft.Container(
                 T.section_title("DATA"),
-                padding=ft.padding.only(left=16, bottom=8),
+                padding=ft.Padding(left=16, right=0, top=0, bottom=8),
             ),
             ft.Container(
                 content=ft.Column(
@@ -168,7 +169,7 @@ def build(page: ft.Page, services: dict, db) -> ft.View:
                     ],
                     spacing=0,
                 ),
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
             ),
             ft.Container(height=32),
         ],

@@ -182,7 +182,7 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
                 content=ft.Text(tag, size=11, color=T.SECONDARY, weight=ft.FontWeight.W_600),
                 bgcolor=T.SURFACE2,
                 border_radius=8,
-                padding=ft.padding.symmetric(horizontal=10, vertical=4),
+                padding=ft.Padding(left=10, right=10, top=4, bottom=4),
             )
             for tag in recipe.tags
         ],
@@ -196,7 +196,7 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
             ft.Container(
                 height=200,
                 bgcolor=T.PRIMARY_DARK,
-                border_radius=ft.border_radius.only(bottom_left=16, bottom_right=16),
+                border_radius=ft.BorderRadius(top_left=0, top_right=0, bottom_left=16, bottom_right=16),
                 content=ft.Column(
                     [
                         ft.Icon(ft.Icons.LOCAL_BAR, color=T.ACCENT, size=64),
@@ -272,7 +272,7 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
                     ],
                     spacing=4,
                 ),
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
             ),
             ft.Container(height=32),
         ],

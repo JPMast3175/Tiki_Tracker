@@ -63,11 +63,11 @@ def build(page: ft.Page, services: dict) -> ft.View:
                     f"❤️ {len(favorites)} favorite drink{'s' if len(favorites) != 1 else ''}",
                     size=13, color=T.TEXT_DIM,
                 ),
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
             ),
             ft.Container(height=8),
         ] + [
-            ft.Container(fav_card(r), padding=ft.padding.symmetric(horizontal=16, vertical=4))
+            ft.Container(fav_card(r), padding=ft.Padding(left=16, right=16, top=4, bottom=4))
             for r in favorites
         ] + [ft.Container(height=24)]
     else:
@@ -94,7 +94,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment(0, 0),
                 padding=40,
                 expand=True,
             )

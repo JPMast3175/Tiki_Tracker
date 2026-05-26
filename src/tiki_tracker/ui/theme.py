@@ -61,7 +61,7 @@ def card(content: ft.Control, padding: int = 16) -> ft.Container:
 
 def section_title(text: str) -> ft.Text:
     return ft.Text(text, color=ACCENT, size=13, weight=ft.FontWeight.BOLD,
-                   letter_spacing=1.2)
+                   style=ft.TextStyle(letter_spacing=1.2))
 
 
 def stars(rating: float, size: int = 18) -> ft.Row:
@@ -85,7 +85,7 @@ def difficulty_badge(level: int) -> ft.Container:
         content=ft.Text(labels.get(level, "?"), size=11, color="white", weight=ft.FontWeight.BOLD),
         bgcolor=colors.get(level, "#666"),
         border_radius=6,
-        padding=ft.padding.symmetric(horizontal=8, vertical=3),
+        padding=ft.Padding(left=8, right=8, top=3, bottom=3),
     )
 
 

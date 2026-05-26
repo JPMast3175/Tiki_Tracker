@@ -21,7 +21,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                     ft.Container(
                         height=120,
                         bgcolor=T.PRIMARY_DARK,
-                        border_radius=ft.border_radius.only(top_left=10, top_right=10),
+                        border_radius=ft.BorderRadius(top_left=10, top_right=10, bottom_left=0, bottom_right=0),
                         content=ft.Stack(
                             [
                                 ft.Column(
@@ -81,7 +81,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                             ],
                             spacing=4,
                         ),
-                        padding=ft.padding.only(left=10, right=10, top=10, bottom=10),
+                        padding=ft.Padding(left=10, right=10, top=10, bottom=10),
                     ),
                 ],
                 spacing=0,
@@ -90,7 +90,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
             border_radius=10,
             on_click=lambda _, rid=recipe.id: page.go(f"/recipe/{rid}"),
             ink=True,
-            animate=ft.animation.Animation(150, ft.AnimationCurve.EASE_IN_OUT),
+            animate=ft.Animation(150, ft.AnimationCurve.EASE_IN_OUT),
         )
 
     # ── Search bar ─────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                 grid_ref.current.controls = [
                     ft.Container(
                         ft.Text("No recipes found. Try a different search.", color=T.TEXT_DIM, size=14),
-                        alignment=ft.alignment.center,
+                        alignment=ft.Alignment(0, 0),
                         padding=40,
                         col={"xs": 12},
                     )
@@ -146,7 +146,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
         grid.controls = [
             ft.Container(
                 ft.Text("No recipes yet. Add one with the + button!", color=T.TEXT_DIM, size=14),
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment(0, 0),
                 padding=40,
             )
         ]
@@ -155,11 +155,11 @@ def build(page: ft.Page, services: dict) -> ft.View:
         [
             ft.Container(
                 content=ft.Row([search_field]),
-                padding=ft.padding.only(left=16, right=16, top=12, bottom=8),
+                padding=ft.Padding(left=16, right=16, top=12, bottom=8),
             ),
             ft.Container(
                 content=grid,
-                padding=ft.padding.symmetric(horizontal=16),
+                padding=ft.Padding(left=16, right=16, top=0, bottom=0),
                 expand=True,
             ),
         ],

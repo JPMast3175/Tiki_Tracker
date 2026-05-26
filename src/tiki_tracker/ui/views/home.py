@@ -148,7 +148,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
             make_card,
             ft.Container(height=24),
         ],
-        padding=ft.padding.symmetric(horizontal=16, vertical=8),
+        padding=ft.Padding(left=16, right=16, top=8, bottom=8),
         spacing=0,
         expand=True,
     )

@@ -256,7 +256,7 @@ def build(page: ft.Page, services: dict, recipe_id: int | None = None) -> ft.Vie
                     ],
                     spacing=10,
                 ),
-                padding=ft.padding.symmetric(horizontal=16, vertical=12),
+                padding=ft.Padding(left=16, right=16, top=12, bottom=12),
             )
         ],
         expand=True,
