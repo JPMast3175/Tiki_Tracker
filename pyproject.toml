@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tiki-tracker"
+version = "1.0.0"
+description = "A modern cross-platform Tiki drink tracking application"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "flet>=0.85.0",
+    "qrcode[pil]>=8.0",
+    "pillow>=10.0",
+]
+
+[project.scripts]
+tiki-tracker = "tiki_tracker.main:run"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tiki_tracker = ["assets/**/*"]
