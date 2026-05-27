@@ -331,7 +331,7 @@ INFO_PLIST = """\
   <key>CFBundleVersion</key>         <string>1</string>
   <key>LSMinimumSystemVersion</key>  <string>12.0</string>
   <key>NSHighResolutionCapable</key> <true/>
-  <key>LSUIElement</key>             <false/>
+  <key>LSUIElement</key>             <true/>
 </dict>
 </plist>
 """
@@ -368,6 +368,25 @@ def build_app(icns_path: Path, proj_path: Path) -> Path:
 
     # Icon
     shutil.copy2(icns_path, resources_dir / "AppIcon.icns")
+
+    # Rebrand Flet.app (the real window process) with our icon + name
+    flet_app = (
+        Path.home()
+        / ".flet" / "client" / "flet-desktop-full-0.85.2" / "Flet.app"
+    )
+    if flet_app.exists():
+        shutil.copy2(icns_path, flet_app / "Contents" / "Resources" / "AppIcon.icns")
+        subprocess.run(
+            ["plutil", "-replace", "CFBundleName",        "-string", "Tiki Tracker",
+             str(flet_app / "Contents" / "Info.plist")], check=False)
+        subprocess.run(
+            ["plutil", "-replace", "CFBundleDisplayName", "-string", "Tiki Tracker",
+             str(flet_app / "Contents" / "Info.plist")], check=False)
+        subprocess.run(
+            ["codesign", "--deep", "--force", "--sign", "-", str(flet_app)],
+            check=False,
+        )
+        print(f"  Flet  → rebranded as Tiki Tracker")
 
     # Ad-hoc codesign + clear quarantine so double-click works on macOS
     subprocess.run(["xattr", "-cr", str(app)], check=False)
