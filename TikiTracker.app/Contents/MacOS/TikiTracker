@@ -1,7 +1,9 @@
 #!/bin/bash
-# Tiki Tracker launcher
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Tiki Tracker — macOS app launcher
+# Calls the venv Python directly; no `source` needed.
+
 PROJ="/Users/josephmast/Tiki_Tracker"
-cd "$PROJ"
-source "$PROJ/venv/bin/activate"
-exec python "$PROJ/run.py"
+PYTHON="$PROJ/venv/bin/python"
+LOG="$PROJ/launcher.log"
+
+exec "$PYTHON" "$PROJ/run.py" >> "$LOG" 2>&1

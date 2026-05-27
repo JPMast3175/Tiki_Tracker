@@ -369,6 +369,12 @@ def build_app(icns_path: Path, proj_path: Path) -> Path:
     # Icon
     shutil.copy2(icns_path, resources_dir / "AppIcon.icns")
 
+    # Ad-hoc codesign + clear quarantine so double-click works on macOS
+    subprocess.run(["xattr", "-cr", str(app)], check=False)
+    subprocess.run(
+        ["codesign", "--deep", "--force", "--sign", "-", str(app)],
+        check=False,
+    )
     print(f"  .app  → {app}")
     return app
 

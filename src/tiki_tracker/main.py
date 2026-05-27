@@ -5,7 +5,7 @@ from pathlib import Path
 import flet as ft
 from tiki_tracker.app import main
 
-_DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 
 def run() -> None:
