@@ -8,6 +8,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
     suggestion_service = services["suggestion"]
     recipe_service     = services["recipe"]
     inventory_service  = services["inventory"]
+    image_service      = services["image"]
 
     suggestion     = suggestion_service.get_drink_of_the_day()
     total_recipes  = recipe_service.count()
@@ -26,6 +27,7 @@ def build(page: ft.Page, services: dict) -> ft.View:
                 ])
             )
 
+        dotd_img_src = image_service.get_image_src(suggestion.id)
         return ft.Container(
             bgcolor=T.SURFACE,
             border_radius=16,
@@ -36,29 +38,47 @@ def build(page: ft.Page, services: dict) -> ft.View:
                     # ── Hero image area ──────────────────────────────
                     ft.Container(
                         height=220,
-                        gradient=ft.LinearGradient(
-                            begin=ft.Alignment(-1, -1),
-                            end=ft.Alignment(1, 1),
-                            colors=["#0D3B0D", "#1E5C1E", "#0D2E0D"],
-                        ),
+                        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                         content=ft.Stack(
                             [
-                                # Radial glow
+                                # Gradient placeholder (hidden when image exists)
                                 ft.Container(
-                                    gradient=ft.RadialGradient(
-                                        center=ft.Alignment(0, -0.2),
-                                        radius=0.75,
-                                        colors=["#254CAF50", "#00000000"],
+                                    visible=not bool(dotd_img_src),
+                                    expand=True,
+                                    gradient=ft.LinearGradient(
+                                        begin=ft.Alignment(-1, -1),
+                                        end=ft.Alignment(1, 1),
+                                        colors=["#0D3B0D", "#1E5C1E", "#0D2E0D"],
                                     ),
-                                    expand=True,
+                                    content=ft.Stack(
+                                        [
+                                            ft.Container(
+                                                gradient=ft.RadialGradient(
+                                                    center=ft.Alignment(0, -0.2),
+                                                    radius=0.75,
+                                                    colors=["#254CAF50", "#00000000"],
+                                                ),
+                                                expand=True,
+                                            ),
+                                            ft.Column(
+                                                [ft.Text("🌴 🍹 🌴", size=50,
+                                                         text_align=ft.TextAlign.CENTER)],
+                                                alignment=ft.MainAxisAlignment.CENTER,
+                                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                                expand=True,
+                                            ),
+                                        ]
+                                    ),
                                 ),
-                                # Centre emoji
-                                ft.Column(
-                                    [ft.Text("🌴 🍹 🌴", size=50,
-                                             text_align=ft.TextAlign.CENTER)],
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                    expand=True,
+                                # Actual drink image
+                                ft.Image(
+                                    src=dotd_img_src or "",
+                                    visible=bool(dotd_img_src),
+                                    fit=ft.BoxFit.COVER,
+                                    width=float("inf"),
+                                    height=220,
+                                    error_content=ft.Container(
+                                        expand=True, bgcolor=T.SURFACE2),
                                 ),
                                 # "DRINK OF THE DAY" pill — top-left
                                 ft.Container(

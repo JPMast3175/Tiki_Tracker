@@ -6,6 +6,7 @@ from tiki_tracker.ui import theme as T
 
 def build(page: ft.Page, services: dict) -> ft.View:
     recipe_service = services["recipe"]
+    image_service  = services["image"]
 
     favorites = sorted(
         recipe_service.get_all(favorites_only=True),
@@ -23,18 +24,38 @@ def build(page: ft.Page, services: dict) -> ft.View:
             ink=True,
             content=ft.Row(
                 [
-                    # Gradient image strip
+                    # Image strip (real image or gradient placeholder)
                     ft.Container(
                         width=80,
-                        gradient=ft.LinearGradient(
-                            begin=ft.Alignment(-1, -1),
-                            end=ft.Alignment(1, 1),
-                            colors=["#1A5218", "#0E3410"],
-                        ),
-                        content=ft.Column(
-                            [ft.Icon(ft.Icons.LOCAL_BAR, color="#80C9A227", size=30)],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                        content=ft.Stack(
+                            [
+                                ft.Container(
+                                    visible=not bool(image_service.get_image_src(recipe.id)),
+                                    expand=True,
+                                    gradient=ft.LinearGradient(
+                                        begin=ft.Alignment(-1, -1),
+                                        end=ft.Alignment(1, 1),
+                                        colors=["#1A5218", "#0E3410"],
+                                    ),
+                                    content=ft.Column(
+                                        [ft.Icon(ft.Icons.LOCAL_BAR,
+                                                 color="#80C9A227", size=30)],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                        expand=True,
+                                    ),
+                                ),
+                                ft.Image(
+                                    src=image_service.get_image_src(recipe.id) or "",
+                                    visible=bool(image_service.get_image_src(recipe.id)),
+                                    fit=ft.BoxFit.COVER,
+                                    width=80,
+                                    height=float("inf"),
+                                    error_content=ft.Container(
+                                        expand=True, bgcolor=T.SURFACE2),
+                                ),
+                            ]
                         ),
                     ),
                     # Info

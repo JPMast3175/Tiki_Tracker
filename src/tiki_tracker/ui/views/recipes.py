@@ -6,6 +6,7 @@ from tiki_tracker.ui import theme as T
 
 def build(page: ft.Page, services: dict) -> ft.View:
     recipe_service = services["recipe"]
+    image_service  = services["image"]
     _search_value  = [""]
     grid_ref       = ft.Ref[ft.GridView]()
 
@@ -22,23 +23,38 @@ def build(page: ft.Page, services: dict) -> ft.View:
             ink=True,
             content=ft.Column(
                 [
-                    # ── Gradient image area ─────────────────────────
+                    # ── Image area ──────────────────────────────────
                     ft.Container(
                         height=148,
-                        gradient=ft.LinearGradient(
-                            begin=ft.Alignment(-1, -1),
-                            end=ft.Alignment(1, 1),
-                            colors=["#1A5218", "#0E3410"],
-                        ),
+                        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                         content=ft.Stack(
                             [
-                                # Central icon
-                                ft.Column(
-                                    [ft.Icon(ft.Icons.LOCAL_BAR,
-                                             color="#80C9A227", size=44)],
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                # Gradient placeholder
+                                ft.Container(
+                                    visible=not bool(image_service.get_image_src(recipe.id)),
                                     expand=True,
+                                    gradient=ft.LinearGradient(
+                                        begin=ft.Alignment(-1, -1),
+                                        end=ft.Alignment(1, 1),
+                                        colors=["#1A5218", "#0E3410"],
+                                    ),
+                                    content=ft.Column(
+                                        [ft.Icon(ft.Icons.LOCAL_BAR,
+                                                 color="#80C9A227", size=44)],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                        expand=True,
+                                    ),
+                                ),
+                                # Actual image
+                                ft.Image(
+                                    src=image_service.get_image_src(recipe.id) or "",
+                                    visible=bool(image_service.get_image_src(recipe.id)),
+                                    fit=ft.BoxFit.COVER,
+                                    width=float("inf"),
+                                    height=148,
+                                    error_content=ft.Container(
+                                        expand=True, bgcolor=T.SURFACE2),
                                 ),
                                 # Difficulty badge — top-left
                                 ft.Container(

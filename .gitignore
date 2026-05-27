@@ -58,6 +58,9 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 
+# Downloaded recipe images (fetched automatically at runtime from CocktailDB)
+data/images/
+
 # Exports (generated at runtime)
 exports/recipes/*.json
 exports/backups/*.json

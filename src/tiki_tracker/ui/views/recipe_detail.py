@@ -11,6 +11,7 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
     recipe_service    = services["recipe"]
     qr_service        = services["qr"]
     inventory_service = services["inventory"]
+    image_service     = services["image"]
 
     recipe = recipe_service.get_by_id(recipe_id)
     if recipe is None:
@@ -57,6 +58,105 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
             for i in range(5)
         ]
 
+    # ── Image state ────────────────────────────────────────────────────────
+    _img_src = [image_service.get_image_src(recipe_id)]
+    hero_img_ref  = ft.Ref[ft.Image]()
+    hero_grad_ref = ft.Ref[ft.Container]()
+
+    def _refresh_hero_image() -> None:
+        src = image_service.get_image_src(recipe_id)
+        _img_src[0] = src
+        if hero_img_ref.current:
+            hero_img_ref.current.src     = src or ""
+            hero_img_ref.current.visible = bool(src)
+        if hero_grad_ref.current:
+            hero_grad_ref.current.visible = not bool(src)
+        page.update()
+
+    # FilePicker registered at build time so Flet's backend knows about it
+    _img_picker = ft.FilePicker()
+    page.overlay.append(_img_picker)
+
+    _img_dlg_ref: list = [None]  # holds the open AlertDialog so close can reach it
+
+    def _close_img_dlg() -> None:
+        dlg = _img_dlg_ref[0]
+        if dlg:
+            dlg.open = False
+            page.update()
+
+    def _on_file_picked(e) -> None:
+        _close_img_dlg()
+        if e.files:
+            ok = image_service.save_from_file(recipe_id, e.files[0].path)
+            T.snack(page, "Image updated!" if ok else "Copy failed.", error=not ok)
+            if ok:
+                _refresh_hero_image()
+
+    _img_picker.on_result = _on_file_picked
+
+    def _apply_url(url: str) -> None:
+        if not url.strip():
+            return
+        ok = image_service.save_from_url(recipe_id, url.strip())
+        T.snack(page, "Image updated!" if ok else "Download failed.", error=not ok)
+        if ok:
+            _refresh_hero_image()
+
+    def show_change_image(_: ft.ControlEvent) -> None:
+        url_field = ft.TextField(
+            hint_text="Paste image URL…",
+            hint_style=ft.TextStyle(color=T.TEXT_DIM),
+            bgcolor=T.SURFACE2,
+            border_color=T.SURFACE3,
+            focused_border_color=T.GOLD,
+            color=T.TEXT,
+            cursor_color=T.GOLD,
+            border_radius=10,
+        )
+
+        def on_url_confirm(_: ft.ControlEvent) -> None:
+            _close_img_dlg()
+            _apply_url(url_field.value or "")
+
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Change Image", color=T.TEXT),
+            content=ft.Column(
+                [
+                    ft.ElevatedButton(
+                        "Choose from device",
+                        icon=ft.Icons.PHOTO_LIBRARY,
+                        bgcolor=T.SURFACE2,
+                        color=T.TEXT,
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+                        on_click=lambda _: _img_picker.pick_files(
+                            allowed_extensions=["jpg", "jpeg", "png", "webp"],
+                            dialog_title="Choose drink image",
+                        ),
+                    ),
+                    ft.Container(height=12),
+                    ft.Text("— or paste a URL below —", size=11, color=T.TEXT_DIM,
+                            text_align=ft.TextAlign.CENTER),
+                    ft.Container(height=8),
+                    url_field,
+                ],
+                tight=True,
+                spacing=0,
+            ),
+            bgcolor=T.SURFACE,
+            actions=[
+                ft.TextButton("Cancel", on_click=lambda _: _close_img_dlg(),
+                              style=ft.ButtonStyle(color=T.TEXT_DIM)),
+                ft.TextButton("Use URL", on_click=on_url_confirm,
+                              style=ft.ButtonStyle(color=T.GOLD)),
+            ],
+        )
+        _img_dlg_ref[0] = dlg
+        page.overlay.append(dlg)
+        dlg.open = True
+        page.update()
+
     # ── Dialogs ────────────────────────────────────────────────────────────
     def close_dlg(dlg: ft.AlertDialog) -> None:
         dlg.open = False
@@ -76,7 +176,7 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
             content=ft.Column(
                 [
                     ft.Image(src=str(qr_path), width=220, height=220,
-                             fit=ft.ImageFit.CONTAIN),
+                             fit=ft.BoxFit.CONTAIN),
                     ft.Text("Scan to import this recipe", size=12,
                             color=T.TEXT_DIM, text_align=ft.TextAlign.CENTER),
                 ],
@@ -186,29 +286,50 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
             # ── Hero ──────────────────────────────────────────────────────
             ft.Container(
                 height=240,
-                gradient=ft.LinearGradient(
-                    begin=ft.Alignment(-1, -1),
-                    end=ft.Alignment(1, 1),
-                    colors=["#0D3B0D", "#1E5C1E", "#0A2A0A"],
-                ),
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                 content=ft.Stack(
                     [
+                        # Gradient placeholder (shown when no image)
                         ft.Container(
-                            gradient=ft.RadialGradient(
-                                center=ft.Alignment(0, -0.1),
-                                radius=0.8,
-                                colors=["#254CAF50", "#00000000"],
+                            ref=hero_grad_ref,
+                            visible=not bool(_img_src[0]),
+                            expand=True,
+                            gradient=ft.LinearGradient(
+                                begin=ft.Alignment(-1, -1),
+                                end=ft.Alignment(1, 1),
+                                colors=["#0D3B0D", "#1E5C1E", "#0A2A0A"],
                             ),
-                            expand=True,
+                            content=ft.Stack(
+                                [
+                                    ft.Container(
+                                        gradient=ft.RadialGradient(
+                                            center=ft.Alignment(0, -0.1),
+                                            radius=0.8,
+                                            colors=["#254CAF50", "#00000000"],
+                                        ),
+                                        expand=True,
+                                    ),
+                                    ft.Column(
+                                        [ft.Text("🌴 🍹 🌴", size=56,
+                                                 text_align=ft.TextAlign.CENTER)],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                        expand=True,
+                                    ),
+                                ]
+                            ),
                         ),
-                        ft.Column(
-                            [ft.Text("🌴 🍹 🌴", size=56,
-                                     text_align=ft.TextAlign.CENTER)],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            expand=True,
+                        # Actual drink image (shown when available)
+                        ft.Image(
+                            ref=hero_img_ref,
+                            src=_img_src[0] or "",
+                            visible=bool(_img_src[0]),
+                            fit=ft.BoxFit.COVER,
+                            width=float("inf"),
+                            height=240,
+                            error_content=ft.Container(expand=True, bgcolor=T.SURFACE2),
                         ),
-                        # Bottom fade
+                        # Bottom fade overlay
                         ft.Container(
                             gradient=ft.LinearGradient(
                                 begin=ft.Alignment(0, 0),
@@ -216,6 +337,18 @@ def build(page: ft.Page, services: dict, recipe_id: int) -> ft.View:
                                 colors=["#00000000", T.BG],
                             ),
                             height=80, bottom=0, left=0, right=0,
+                        ),
+                        # Camera / change image button — bottom-right
+                        ft.Container(
+                            content=ft.IconButton(
+                                icon=ft.Icons.CAMERA_ALT,
+                                icon_color="white",
+                                icon_size=18,
+                                bgcolor="#88000000",
+                                on_click=show_change_image,
+                                tooltip="Change image",
+                            ),
+                            right=12, bottom=16,
                         ),
                     ]
                 ),

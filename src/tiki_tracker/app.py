@@ -14,6 +14,7 @@ from tiki_tracker.services.inventory_service import InventoryService
 from tiki_tracker.services.suggestion_service import SuggestionService
 from tiki_tracker.services.qr_service import QRService
 from tiki_tracker.services.export_service import ExportService
+from tiki_tracker.services.image_service import ImageService
 from tiki_tracker.ui import theme as T
 from tiki_tracker.ui.views import home, recipes, recipe_detail, inventory, favorites, add_recipe, settings
 
@@ -98,15 +99,24 @@ def main(page: ft.Page) -> None:
         log.exception("Database init failed — cannot continue")
         raise
 
+    data_dir = db.db_path.parent
     recipe_service = RecipeService(db)
     inventory_service = InventoryService(db)
+    image_service = ImageService(data_dir, recipe_service)
     services = {
         "recipe": recipe_service,
         "inventory": inventory_service,
         "suggestion": SuggestionService(recipe_service, inventory_service),
         "qr": QRService(),
         "export": ExportService(recipe_service, inventory_service),
+        "image": image_service,
     }
+
+    # Kick off background image download for any recipes missing images
+    def _on_img_fetched(recipe_id: int) -> None:
+        log.info("Image ready for recipe %d", recipe_id)
+
+    image_service.fetch_all_seed_images(on_progress=_on_img_fetched)
 
     # ── Page setup ─────────────────────────────────────────────────────────
     page.title = "Tiki Tracker"
@@ -118,6 +128,14 @@ def main(page: ft.Page) -> None:
         page.window.min_height = 600
     except Exception:
         log.warning("window.min_size not supported on this platform")
+
+    # Set window icon from the generated PNG
+    _icon_path = data_dir / "tiki_tracker_icon.png"
+    if _icon_path.exists():
+        try:
+            page.window.icon = str(_icon_path)
+        except Exception:
+            pass
 
     log.info("Page setup complete. page.route=%r", page.route)
 

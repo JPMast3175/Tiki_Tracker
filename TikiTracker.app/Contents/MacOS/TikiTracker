@@ -1,0 +1,7 @@
+#!/bin/bash
+# Tiki Tracker launcher
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJ="/Users/josephmast/Tiki_Tracker"
+cd "$PROJ"
+source "$PROJ/venv/bin/activate"
+exec python "$PROJ/run.py"
